@@ -1,8 +1,47 @@
 [![CodeGuide](/codeguide-backdrop.svg)](https://codeguide.dev)
 
-# CodeGuide Starter Kit
+# CodeGuide Starter Kit + Kantong Freelance
 
 A modern web application starter template built with Next.js 15, featuring authentication, database integration, AI capabilities, and dark mode support.
+
+This project has been extended with "Kantong Freelance" - a financial management application for freelancers and SMEs in Indonesia.
+
+## Features Implemented
+
+### Kantong Freelance Application
+
+1. **Dashboard Keuangan** - Overview keadaan finansial bisnis
+2. **Manajemen Klien** - Simpan dan kelola data klien
+3. **Manajemen Invoice** - Buat, kirim, dan lacak tagihan
+4. **Pencatatan Pengeluaran** - Catat semua biaya operasional
+
+### Tech Stack
+
+- **Frontend**: Next.js 14 dengan App Router
+- **Backend**: Supabase (Database, Authentication, Storage)
+- **Styling**: Tailwind CSS dengan shadcn/ui components
+- **Deployment**: Vercel
+- **Authentication**: Clerk
+
+## Documentation
+
+- [Kantong Freelance Summary](KANTONG-FREELANCE-SUMMARY.md)
+- [Kantong Freelance Full Documentation](README-KANTONG-FREELANCE.md)
+
+## Setup Development
+
+1. Clone repository
+2. Install dependencies: `npm install`
+3. Salin `.env.local.example` ke `.env.local` dan isi dengan kredensial:
+   - Clerk keys
+   - Supabase URL dan anon key
+4. Jalankan development server: `npm run dev`
+
+## Build Status
+
+✅ TypeScript compilation successful  
+✅ No type errors  
+⚠️ Static generation requires valid Clerk credentials for production build
 
 ## Tech Stack
 
