@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useExpenses } from '@/hooks/useExpenses';
 import { toast } from 'sonner';
 import { Expense, AppError } from '@/types';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 export default function ExpensesContent() {
   const { expenses, loading, error, createExpense, updateExpense, deleteExpense } = useExpenses();
@@ -100,10 +101,6 @@ export default function ExpensesContent() {
     setIsDialogOpen(true);
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
-
   if (error) {
     return <div className="text-red-500">Error loading data: {error}</div>;
   }
@@ -129,6 +126,7 @@ export default function ExpensesContent() {
                   value={formData.description}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -141,6 +139,7 @@ export default function ExpensesContent() {
                   value={formData.amount}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -150,6 +149,7 @@ export default function ExpensesContent() {
                   name="category" 
                   value={formData.category} 
                   onValueChange={(value) => setFormData(prev => ({...prev, category: value}))}
+                  disabled={loading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih kategori" />
@@ -174,10 +174,13 @@ export default function ExpensesContent() {
                   value={formData.expense_date}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
               
-              <Button type="submit">{editingExpense ? 'Update Pengeluaran' : 'Simpan Pengeluaran'}</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Menyimpan...' : (editingExpense ? 'Update Pengeluaran' : 'Simpan Pengeluaran')}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -188,7 +191,9 @@ export default function ExpensesContent() {
           <CardTitle>Daftar Pengeluaran Anda</CardTitle>
         </CardHeader>
         <CardContent>
-          {expenses.length === 0 ? (
+          {loading ? (
+            <TableSkeleton />
+          ) : expenses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Belum ada pengeluaran. Tambahkan pengeluaran pertama Anda.
             </div>
@@ -206,14 +211,32 @@ export default function ExpensesContent() {
               <TableBody>
                 {expenses.map((expense: Expense) => (
                   <TableRow key={expense.id}>
-                    <TableCell>{expense.description}</TableCell>
-                    <TableCell>{expense.category || '-'}</TableCell>
-                    <TableCell>{expense.expense_date}</TableCell>
+                    <TableCell className="font-medium">{expense.description}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {expense.category || 'Umum'}
+                      </span>
+                    </TableCell>
+                    <TableCell>{new Date(expense.expense_date).toLocaleDateString('id-ID')}</TableCell>
                     <TableCell>Rp {parseInt(expense.amount.toString()).toLocaleString('id-ID')}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(expense)}>Edit</Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete(expense.id)}>Hapus</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleEdit(expense)}
+                          disabled={loading}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={() => handleDelete(expense.id)}
+                          disabled={loading}
+                        >
+                          Hapus
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>

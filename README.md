@@ -150,7 +150,7 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 - 🚀 App Router with Server Components
 - 🔒 Row Level Security examples with Clerk user IDs
 - 📱 Responsive design with TailwindCSS v4
-- 🎨 Custom fonts (Geist Sans, Geist Mono, Parkinsans)
+- 🎨 Custom fonts (Geist Sans, Geist Mono, Poppins)
 
 ## Project Structure
 

@@ -12,6 +12,7 @@ import { useInvoices } from '@/hooks/useInvoices';
 import { useClients } from '@/hooks/useClients';
 import { toast } from 'sonner';
 import { Invoice, Client, AppError } from '@/types';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 export default function InvoicesContent() {
   const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice } = useInvoices();
@@ -154,13 +155,11 @@ export default function InvoicesContent() {
     }
   };
 
-  if (loading || clientsLoading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
-
   if (error) {
     return <div className="text-red-500">Error loading data: {error}</div>;
   }
+
+  const combinedLoading = loading || clientsLoading;
 
   return (
     <div className="space-y-6">
@@ -168,7 +167,7 @@ export default function InvoicesContent() {
         <h2 className="text-xl font-semibold">Daftar Invoice</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleOpenDialog}>Buat Invoice Baru</Button>
+            <Button onClick={handleOpenDialog} disabled={combinedLoading}>Buat Invoice Baru</Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -182,6 +181,7 @@ export default function InvoicesContent() {
                     name="client_id" 
                     value={formData.client_id} 
                     onValueChange={(value) => setFormData(prev => ({...prev, client_id: value}))}
+                    disabled={combinedLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih klien" />
@@ -203,6 +203,7 @@ export default function InvoicesContent() {
                     value={formData.invoice_number}
                     onChange={handleInputChange}
                     required
+                    disabled={combinedLoading}
                   />
                 </div>
               </div>
@@ -217,6 +218,7 @@ export default function InvoicesContent() {
                     value={formData.issue_date}
                     onChange={handleInputChange}
                     required
+                    disabled={combinedLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -228,6 +230,7 @@ export default function InvoicesContent() {
                     value={formData.due_date}
                     onChange={handleInputChange}
                     required
+                    disabled={combinedLoading}
                   />
                 </div>
               </div>
@@ -242,6 +245,7 @@ export default function InvoicesContent() {
                         value={item.item}
                         onChange={(e) => handleItemChange(index, 'item', e.target.value)}
                         required
+                        disabled={combinedLoading}
                       />
                     </div>
                     <div className="col-span-2">
@@ -251,6 +255,7 @@ export default function InvoicesContent() {
                         value={item.qty}
                         onChange={(e) => handleItemChange(index, 'qty', parseInt(e.target.value) || 0)}
                         required
+                        disabled={combinedLoading}
                       />
                     </div>
                     <div className="col-span-3">
@@ -260,6 +265,7 @@ export default function InvoicesContent() {
                         value={item.price}
                         onChange={(e) => handleItemChange(index, 'price', parseInt(e.target.value) || 0)}
                         required
+                        disabled={combinedLoading}
                       />
                     </div>
                     <div className="col-span-2">
@@ -268,14 +274,19 @@ export default function InvoicesContent() {
                         variant="destructive" 
                         size="sm"
                         onClick={() => removeItem(index)}
-                        disabled={formData.items.length <= 1}
+                        disabled={combinedLoading || formData.items.length <= 1}
                       >
                         Hapus
                       </Button>
                     </div>
                   </div>
                 ))}
-                <Button type="button" variant="outline" onClick={addItem}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={addItem}
+                  disabled={combinedLoading}
+                >
                   Tambah Item
                 </Button>
               </div>
@@ -287,6 +298,7 @@ export default function InvoicesContent() {
                   name="notes"
                   value={formData.notes}
                   onChange={handleInputChange}
+                  disabled={combinedLoading}
                 />
               </div>
               
@@ -294,7 +306,9 @@ export default function InvoicesContent() {
                 <div className="text-lg font-semibold">
                   Total: Rp {calculateTotal().toLocaleString('id-ID')}
                 </div>
-                <Button type="submit">{editingInvoice ? 'Update Invoice' : 'Simpan Invoice'}</Button>
+                <Button type="submit" disabled={combinedLoading}>
+                  {combinedLoading ? 'Menyimpan...' : (editingInvoice ? 'Update Invoice' : 'Simpan Invoice')}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -306,7 +320,9 @@ export default function InvoicesContent() {
           <CardTitle>Daftar Invoice Anda</CardTitle>
         </CardHeader>
         <CardContent>
-          {invoices.length === 0 ? (
+          {combinedLoading ? (
+            <TableSkeleton />
+          ) : invoices.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Belum ada invoice. Buat invoice pertama Anda.
             </div>
@@ -326,10 +342,10 @@ export default function InvoicesContent() {
               <TableBody>
                 {invoices.map((invoice: Invoice) => (
                   <TableRow key={invoice.id}>
-                    <TableCell>{invoice.invoice_number}</TableCell>
+                    <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                     <TableCell>{invoice.clients?.name || 'Klien tidak ditemukan'}</TableCell>
-                    <TableCell>{invoice.issue_date}</TableCell>
-                    <TableCell>{invoice.due_date}</TableCell>
+                    <TableCell>{new Date(invoice.issue_date).toLocaleDateString('id-ID')}</TableCell>
+                    <TableCell>{new Date(invoice.due_date).toLocaleDateString('id-ID')}</TableCell>
                     <TableCell>Rp {invoice.total_amount.toLocaleString('id-ID')}</TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
@@ -343,12 +359,20 @@ export default function InvoicesContent() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(invoice)}>Edit</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleEdit(invoice)}
+                          disabled={combinedLoading}
+                        >
+                          Edit
+                        </Button>
                         {invoice.status === 'draft' && (
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => updateInvoiceStatus(invoice.id, 'sent')}
+                            disabled={combinedLoading}
                           >
                             Kirim
                           </Button>
@@ -358,11 +382,19 @@ export default function InvoicesContent() {
                             variant="outline" 
                             size="sm" 
                             onClick={() => updateInvoiceStatus(invoice.id, 'paid')}
+                            disabled={combinedLoading}
                           >
                             Lunas
                           </Button>
                         )}
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete(invoice.id)}>Hapus</Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={() => handleDelete(invoice.id)}
+                          disabled={combinedLoading}
+                        >
+                          Hapus
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>

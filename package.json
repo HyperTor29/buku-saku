@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbopack",
+    "dev:optimized": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build:incremental": "NODE_OPTIONS='--max-old-space-size=4096' next build --profile",
+    "start": "NODE_OPTIONS='--max-old-space-size=4096' next start",
+    "lint": "NODE_OPTIONS='--max-old-space-size=4096' next lint",
+    "lint:fix": "NODE_OPTIONS='--max-old-space-size=4096' next lint --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next && rm -rf node_modules && npm cache clean --force"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

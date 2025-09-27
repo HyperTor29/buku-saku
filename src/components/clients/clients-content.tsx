@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useClients } from '@/hooks/useClients';
 import { toast } from 'sonner';
 import { Client, AppError } from '@/types';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 export default function ClientsContent() {
   const { clients, loading, error, createClient, updateClient, deleteClient } = useClients();
@@ -79,10 +80,6 @@ export default function ClientsContent() {
     setIsDialogOpen(true);
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
-
   if (error) {
     return <div className="text-red-500">Error loading data: {error}</div>;
   }
@@ -93,7 +90,7 @@ export default function ClientsContent() {
         <h2 className="text-xl font-semibold">Daftar Klien</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleOpenDialog}>Tambah Klien</Button>
+            <Button onClick={handleOpenDialog} disabled={loading}>Tambah Klien</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -108,6 +105,7 @@ export default function ClientsContent() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -118,6 +116,7 @@ export default function ClientsContent() {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -127,6 +126,7 @@ export default function ClientsContent() {
                   name="phone_number"
                   value={formData.phone_number}
                   onChange={handleInputChange}
+                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -136,9 +136,12 @@ export default function ClientsContent() {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
+                  disabled={loading}
                 />
               </div>
-              <Button type="submit">{editingClient ? 'Update Klien' : 'Simpan Klien'}</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Menyimpan...' : (editingClient ? 'Update Klien' : 'Simpan Klien')}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -149,7 +152,9 @@ export default function ClientsContent() {
           <CardTitle>Daftar Klien Anda</CardTitle>
         </CardHeader>
         <CardContent>
-          {clients.length === 0 ? (
+          {loading ? (
+            <TableSkeleton />
+          ) : clients.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Belum ada klien. Tambahkan klien pertama Anda.
             </div>
@@ -167,14 +172,28 @@ export default function ClientsContent() {
               <TableBody>
                 {clients.map((client: Client) => (
                   <TableRow key={client.id}>
-                    <TableCell>{client.name}</TableCell>
+                    <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>{client.email || '-'}</TableCell>
                     <TableCell>{client.phone_number || '-'}</TableCell>
                     <TableCell>{client.address || '-'}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(client)}>Edit</Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete(client.id)}>Hapus</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleEdit(client)}
+                          disabled={loading}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={() => handleDelete(client.id)}
+                          disabled={loading}
+                        >
+                          Hapus
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
